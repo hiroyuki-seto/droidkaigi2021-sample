@@ -47,16 +47,8 @@ class FirstFragment : Fragment() {
     private fun loadData(url: String) {
         binding.textviewFirst.setText(R.string.loading)
         object : AsyncTask<Unit, Unit, String>() {
-            override fun doInBackground(vararg p0: Unit?): String {
-                val client = OkHttpClient()
-
-                val request: Request = Request.Builder()
-                    .url(url)
-                    .build()
-
-                return client.newCall(request).execute()
-                    .use { response -> response.code.toString() }
-            }
+            override fun doInBackground(vararg p0: Unit?): String =
+                RemoteDataSource().blockingGetResponseCode(url).toString()
 
             override fun onPostExecute(result: String?) {
                 super.onPostExecute(result)
