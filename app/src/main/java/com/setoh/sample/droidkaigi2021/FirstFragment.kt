@@ -48,7 +48,7 @@ class FirstFragment : Fragment() {
         binding.textviewFirst.setText(R.string.loading)
         object : AsyncTask<Unit, Unit, String>() {
             override fun doInBackground(vararg p0: Unit?): String =
-                RemoteDataSource().blockingGetResponseCode(url).toString()
+                Repository().blockingGetResponseCode(url).toString()
 
             override fun onPostExecute(result: String?) {
                 super.onPostExecute(result)
