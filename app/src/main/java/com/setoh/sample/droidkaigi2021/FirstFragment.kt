@@ -1,14 +1,12 @@
 package com.setoh.sample.droidkaigi2021
 
-import android.os.AsyncTask
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.setoh.sample.droidkaigi2021.databinding.FragmentFirstBinding
-import okhttp3.OkHttpClient
-import okhttp3.Request
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -20,6 +18,14 @@ class FirstFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    private val repository: Repository = Repository()
+
+    private val viewModel: FirstFragmentViewModel by viewModels {
+        FirstFragmentViewModel.Factory(
+            repository = repository
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,14 +52,8 @@ class FirstFragment : Fragment() {
 
     private fun loadData(url: String) {
         binding.textviewFirst.setText(R.string.loading)
-        object : AsyncTask<Unit, Unit, String>() {
-            override fun doInBackground(vararg p0: Unit?): String =
-                Repository().blockingGetResponseCode(url).toString()
-
-            override fun onPostExecute(result: String?) {
-                super.onPostExecute(result)
-                binding.textviewFirst.text = result
-            }
-        }.execute(Unit)
+        viewModel.loadResponseCode(url) { responseCode ->
+            binding.textviewFirst.text = responseCode
+        }
     }
 }
