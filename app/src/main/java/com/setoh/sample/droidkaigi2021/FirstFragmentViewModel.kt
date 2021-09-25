@@ -1,13 +1,17 @@
 package com.setoh.sample.droidkaigi2021
 
 import android.app.Application
-import android.os.AsyncTask
 import android.view.View
 import androidx.lifecycle.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class FirstFragmentViewModel(
     application: Application,
     private val repository: Repository,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : AndroidViewModel(application) {
 
     private val _textviewFirstText: MutableLiveData<String> = MutableLiveData()
@@ -20,15 +24,11 @@ class FirstFragmentViewModel(
     fun onButtonFirstClick(@Suppress("UNUSED_PARAMETER") view: View) {
         val url = "https://google.com"
         _textviewFirstText.value = getApplication<Application>().getString(R.string.loading)
-        object : AsyncTask<Unit, Unit, String>() {
-            override fun doInBackground(vararg p0: Unit?): String =
+        viewModelScope.launch {
+            _textviewFirstText.value = withContext(dispatcher) {
                 repository.blockingGetResponseCode(url).toString()
-
-            override fun onPostExecute(result: String?) {
-                super.onPostExecute(result)
-                _textviewFirstText.value = result
             }
-        }.execute(Unit)
+        }
     }
 
     class Factory(

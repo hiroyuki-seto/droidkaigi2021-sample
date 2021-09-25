@@ -5,18 +5,23 @@ import androidx.lifecycle.Observer
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import io.mockk.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.LooperMode
-import org.robolectric.shadows.ShadowApplication
-import org.robolectric.shadows.ShadowLooper
 
 @RunWith(RobolectricTestRunner::class)
 @LooperMode(LooperMode.Mode.LEGACY)
 @Config(sdk = [29])
+@ExperimentalCoroutinesApi
 class FirstFragmentViewModelTest {
 
     private lateinit var mockRepository: Repository
@@ -26,14 +31,23 @@ class FirstFragmentViewModelTest {
 
     @Before
     fun setup() {
+        val testCoroutineDispatcher = TestCoroutineDispatcher()
         mockRepository = mockk()
         viewModel = FirstFragmentViewModel(
             application = ApplicationProvider.getApplicationContext(),
             repository = mockRepository,
+            dispatcher = testCoroutineDispatcher,
         )
 
         loadingText = ApplicationProvider.getApplicationContext<Context>()
             .getString(R.string.loading)
+
+        Dispatchers.setMain(testCoroutineDispatcher)
+    }
+
+    @After
+    fun clear() {
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -49,9 +63,6 @@ class FirstFragmentViewModelTest {
         val spyObserver = spyk(observer)
         viewModel.textviewFirstText.observeForever(spyObserver)
         viewModel.onButtonFirstClick(mockk())
-
-        ShadowApplication.runBackgroundTasks()
-        ShadowLooper.runUiThreadTasks()
 
         assertThat(viewModel.textviewFirstText.value).isEqualTo(expectedResponseCode.toString())
         verifyOrder {
