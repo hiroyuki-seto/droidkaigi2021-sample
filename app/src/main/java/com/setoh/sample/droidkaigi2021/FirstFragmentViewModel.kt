@@ -1,6 +1,8 @@
 package com.setoh.sample.droidkaigi2021
 
 import android.os.AsyncTask
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
@@ -8,14 +10,17 @@ class FirstFragmentViewModel(
     private val repository: Repository
 ) : ViewModel() {
 
-    fun loadResponseCode(url: String, callback: (String?) -> Unit) {
+    private val _responseCode: MutableLiveData<String> = MutableLiveData()
+    val responseCode: LiveData<String> = _responseCode
+
+    fun loadResponseCode(url: String) {
         object : AsyncTask<Unit, Unit, String>() {
             override fun doInBackground(vararg p0: Unit?): String =
                 repository.blockingGetResponseCode(url).toString()
 
             override fun onPostExecute(result: String?) {
                 super.onPostExecute(result)
-                callback(result)
+                _responseCode.value = result
             }
         }.execute(Unit)
     }

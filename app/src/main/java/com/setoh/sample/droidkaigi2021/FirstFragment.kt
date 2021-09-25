@@ -43,6 +43,10 @@ class FirstFragment : Fragment() {
         binding.buttonFirst.setOnClickListener {
             loadData("https://google.com")
         }
+
+        viewModel.responseCode.observe(viewLifecycleOwner) { responseCode ->
+            binding.textviewFirst.text = responseCode
+        }
     }
 
     override fun onDestroyView() {
@@ -52,8 +56,6 @@ class FirstFragment : Fragment() {
 
     private fun loadData(url: String) {
         binding.textviewFirst.setText(R.string.loading)
-        viewModel.loadResponseCode(url) { responseCode ->
-            binding.textviewFirst.text = responseCode
-        }
+        viewModel.loadResponseCode(url)
     }
 }

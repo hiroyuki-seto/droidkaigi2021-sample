@@ -1,8 +1,8 @@
 package com.setoh.sample.droidkaigi2021
 
+import androidx.lifecycle.Observer
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
-import io.mockk.mockk
+import io.mockk.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -31,14 +31,21 @@ class FirstFragmentViewModelTest {
         val expectedResponseCode = 200
         every { mockRepository.blockingGetResponseCode(any()) } returns expectedResponseCode
 
-        var code: String? = null
-        viewModel.loadResponseCode("https://hogehoge.com") { responseCode ->
-            code = responseCode
+        // see https://stackoverflow.com/questions/67736717/mockk-spky-throwing-noclassdeffounderror
+        @Suppress("ObjectLiteralToLambda")
+        val observer: Observer<String> = object : Observer<String> {
+            override fun onChanged(t: String?) {}
         }
+        val spyObserver = spyk(observer)
+        viewModel.responseCode.observeForever(spyObserver)
+        viewModel.loadResponseCode("https://hogehoge.com")
 
         ShadowApplication.runBackgroundTasks()
         ShadowLooper.runUiThreadTasks()
 
-        assertThat(code).isEqualTo(expectedResponseCode.toString())
+        assertThat(viewModel.responseCode.value).isEqualTo(expectedResponseCode.toString())
+        verify(exactly = 1) {
+            spyObserver.onChanged(expectedResponseCode.toString())
+        }
     }
 }
