@@ -1,37 +1,47 @@
 package com.setoh.sample.droidkaigi2021
 
+import android.app.Application
 import android.os.AsyncTask
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import android.view.View
+import androidx.lifecycle.*
 
 class FirstFragmentViewModel(
-    private val repository: Repository
-) : ViewModel() {
+    application: Application,
+    private val repository: Repository,
+) : AndroidViewModel(application) {
 
-    private val _responseCode: MutableLiveData<String> = MutableLiveData()
-    val responseCode: LiveData<String> = _responseCode
+    private val _textviewFirstText: MutableLiveData<String> = MutableLiveData()
+    val textviewFirstText: LiveData<String> = _textviewFirstText
 
-    fun loadResponseCode(url: String) {
+    init {
+        _textviewFirstText.value = application.getString(R.string.hello_first_fragment)
+    }
+
+    fun onButtonFirstClick(@Suppress("UNUSED_PARAMETER") view: View) {
+        val url = "https://google.com"
+        _textviewFirstText.value = getApplication<Application>().getString(R.string.loading)
         object : AsyncTask<Unit, Unit, String>() {
             override fun doInBackground(vararg p0: Unit?): String =
                 repository.blockingGetResponseCode(url).toString()
 
             override fun onPostExecute(result: String?) {
                 super.onPostExecute(result)
-                _responseCode.value = result
+                _textviewFirstText.value = result
             }
         }.execute(Unit)
     }
 
     class Factory(
-        private val repository: Repository
+        private val application: Application,
+        private val repository: Repository,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return if (modelClass == FirstFragmentViewModel::class.java) {
-                FirstFragmentViewModel(repository) as T
+                FirstFragmentViewModel(
+                    application,
+                    repository
+                ) as T
             } else {
                 throw IllegalArgumentException()
             }

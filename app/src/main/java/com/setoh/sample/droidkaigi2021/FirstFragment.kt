@@ -1,5 +1,6 @@
 package com.setoh.sample.droidkaigi2021
 
+import android.app.Application
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +24,8 @@ class FirstFragment : Fragment() {
 
     private val viewModel: FirstFragmentViewModel by viewModels {
         FirstFragmentViewModel.Factory(
-            repository = repository
+            application = requireContext().applicationContext as Application,
+            repository = repository,
         )
     }
 
@@ -39,23 +41,12 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.buttonFirst.setOnClickListener {
-            loadData("https://google.com")
-        }
-
-        viewModel.responseCode.observe(viewLifecycleOwner) { responseCode ->
-            binding.textviewFirst.text = responseCode
-        }
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.viewModel = viewModel
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun loadData(url: String) {
-        binding.textviewFirst.setText(R.string.loading)
-        viewModel.loadResponseCode(url)
     }
 }
