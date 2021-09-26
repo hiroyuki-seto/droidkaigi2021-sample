@@ -19,7 +19,7 @@ class FirstFragment : Fragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    private val repository: Repository = Repository()
+    private val repository: Repository = RepositoryProvider.repository
 
     private val viewModel: FirstFragmentViewModel by viewModels {
         FirstFragmentViewModel.Factory(

@@ -1,8 +1,8 @@
 package com.setoh.sample.droidkaigi2021
 
-class Repository(
+open class Repository(
     private val remoteDataSource: RemoteDataSource = RemoteDataSource()
 ) {
-    fun blockingGetResponseCode(url: String): Int =
+    open fun blockingGetResponseCode(url: String): Int =
         remoteDataSource.blockingGetResponseCode(url)
 }
