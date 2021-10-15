@@ -1,14 +1,13 @@
 package com.setoh.sample.droidkaigi2021
 
-import android.os.AsyncTask
+import android.app.Application
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.setoh.sample.droidkaigi2021.databinding.FragmentFirstBinding
-import okhttp3.OkHttpClient
-import okhttp3.Request
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -20,6 +19,15 @@ class FirstFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
+    private val repository: Repository = RepositoryProvider.repository
+
+    private val viewModel: FirstFragmentViewModel by viewModels {
+        FirstFragmentViewModel.Factory(
+            application = requireContext().applicationContext as Application,
+            repository = repository,
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,35 +41,12 @@ class FirstFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.buttonFirst.setOnClickListener {
-            loadData("https://google.com")
-        }
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.viewModel = viewModel
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-    }
-
-    private fun loadData(url: String) {
-        binding.textviewFirst.setText(R.string.loading)
-        object : AsyncTask<Unit, Unit, String>() {
-            override fun doInBackground(vararg p0: Unit?): String {
-                val client = OkHttpClient()
-
-                val request: Request = Request.Builder()
-                    .url(url)
-                    .build()
-
-                return client.newCall(request).execute()
-                    .use { response -> response.code.toString() }
-            }
-
-            override fun onPostExecute(result: String?) {
-                super.onPostExecute(result)
-                binding.textviewFirst.text = result
-            }
-        }.execute(Unit)
     }
 }
